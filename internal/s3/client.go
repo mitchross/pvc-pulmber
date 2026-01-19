@@ -51,7 +51,7 @@ func (c *Client) CheckBackupExists(ctx context.Context, namespace, pvc string) C
 	if err != nil {
 		return CheckResult{Exists: false, Error: fmt.Sprintf("failed to query S3: %v", err)}
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)

@@ -16,11 +16,11 @@ func TestLoad(t *testing.T) {
 
 	// Restore env vars after test
 	defer func() {
-		os.Setenv("S3_ENDPOINT", origS3Endpoint)
-		os.Setenv("S3_BUCKET", origS3Bucket)
-		os.Setenv("HTTP_TIMEOUT", origHTTPTimeout)
-		os.Setenv("PORT", origPort)
-		os.Setenv("LOG_LEVEL", origLogLevel)
+		_ = os.Setenv("S3_ENDPOINT", origS3Endpoint)
+		_ = os.Setenv("S3_BUCKET", origS3Bucket)
+		_ = os.Setenv("HTTP_TIMEOUT", origHTTPTimeout)
+		_ = os.Setenv("PORT", origPort)
+		_ = os.Setenv("LOG_LEVEL", origLogLevel)
 	}()
 
 	tests := []struct {
@@ -104,15 +104,15 @@ func TestLoad(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Clear all env vars
-			os.Unsetenv("S3_ENDPOINT")
-			os.Unsetenv("S3_BUCKET")
-			os.Unsetenv("HTTP_TIMEOUT")
-			os.Unsetenv("PORT")
-			os.Unsetenv("LOG_LEVEL")
+			_ = os.Unsetenv("S3_ENDPOINT")
+			_ = os.Unsetenv("S3_BUCKET")
+			_ = os.Unsetenv("HTTP_TIMEOUT")
+			_ = os.Unsetenv("PORT")
+			_ = os.Unsetenv("LOG_LEVEL")
 
 			// Set test env vars
 			for k, v := range tt.envVars {
-				os.Setenv(k, v)
+				_ = os.Setenv(k, v)
 			}
 
 			cfg, err := Load()

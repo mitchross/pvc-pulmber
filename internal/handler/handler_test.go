@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -13,14 +12,6 @@ import (
 
 	"github.com/mitchross/pvc-pulmber/internal/s3"
 )
-
-type mockS3Client struct {
-	result s3.CheckResult
-}
-
-func (m *mockS3Client) CheckBackupExists(ctx context.Context, namespace, pvc string) s3.CheckResult {
-	return m.result
-}
 
 func TestHandleExists(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
@@ -98,15 +89,15 @@ func TestHandleExists(t *testing.T) {
 				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(http.StatusOK)
 					if tt.mockResult.Exists {
-						w.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+						_, _ = w.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
   <KeyCount>1</KeyCount>
 </ListBucketResult>`))
 					} else if tt.mockResult.Error != "" {
 						w.WriteHeader(http.StatusInternalServerError)
-						w.Write([]byte(`error`))
+						_, _ = w.Write([]byte(`error`))
 					} else {
-						w.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+						_, _ = w.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
   <KeyCount>0</KeyCount>
 </ListBucketResult>`))
@@ -245,7 +236,7 @@ func TestMetricsCounters(t *testing.T) {
 	// Create a mock server that returns success
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+		_, _ = w.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
   <KeyCount>1</KeyCount>
 </ListBucketResult>`))

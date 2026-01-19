@@ -54,7 +54,7 @@ func (h *Handler) HandleExists(w http.ResponseWriter, r *http.Request) {
 		h.logger.Warn("invalid request path", "path", path)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"exists": false,
 			"error":  "invalid path format, expected /exists/{namespace}/{pvc}",
 		})
@@ -76,12 +76,12 @@ func (h *Handler) HandleExists(w http.ResponseWriter, r *http.Request) {
 		"keyCount", result.KeyCount)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	_ = json.NewEncoder(w).Encode(result)
 }
 
 func (h *Handler) HandleHealthz(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }
 
 func (h *Handler) HandleReadyz(w http.ResponseWriter, r *http.Request) {
@@ -91,10 +91,10 @@ func (h *Handler) HandleReadyz(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
-	fmt.Fprintf(w, "# HELP pvc_plumber_requests_total Total number of backup check requests\n")
-	fmt.Fprintf(w, "# TYPE pvc_plumber_requests_total counter\n")
-	fmt.Fprintf(w, "pvc_plumber_requests_total %d\n", h.requestsTotal.Load())
-	fmt.Fprintf(w, "# HELP pvc_plumber_requests_errors_total Total number of failed backup check requests\n")
-	fmt.Fprintf(w, "# TYPE pvc_plumber_requests_errors_total counter\n")
-	fmt.Fprintf(w, "pvc_plumber_requests_errors_total %d\n", h.requestsErrors.Load())
+	_, _ = fmt.Fprintf(w, "# HELP pvc_plumber_requests_total Total number of backup check requests\n")
+	_, _ = fmt.Fprintf(w, "# TYPE pvc_plumber_requests_total counter\n")
+	_, _ = fmt.Fprintf(w, "pvc_plumber_requests_total %d\n", h.requestsTotal.Load())
+	_, _ = fmt.Fprintf(w, "# HELP pvc_plumber_requests_errors_total Total number of failed backup check requests\n")
+	_, _ = fmt.Fprintf(w, "# TYPE pvc_plumber_requests_errors_total counter\n")
+	_, _ = fmt.Fprintf(w, "pvc_plumber_requests_errors_total %d\n", h.requestsErrors.Load())
 }
