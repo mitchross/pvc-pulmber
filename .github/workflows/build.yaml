@@ -1,0 +1,82 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Verify dependencies
+      run: go mod verify
+
+    - name: Run go vet
+      run: go vet ./...
+
+    - name: Run tests
+      run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+    - name: Check coverage
+      run: |
+        total_coverage=$(go tool cover -func=coverage.txt | grep total | awk '{print $3}' | sed 's/%//')
+        echo "Total coverage: ${total_coverage}%"
+        if (( $(echo "$total_coverage < 80" | bc -l) )); then
+          echo "ERROR: Coverage is below 80%"
+          exit 1
+        fi
+
+    - name: Upload coverage to GitHub
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        files: ./coverage.txt
+        fail_ci_if_error: false
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Build binary
+      run: CGO_ENABLED=0 go build -v -o pvc-plumber ./cmd/pvc-plumber
+
+    - name: Build Docker image
+      run: docker build -t pvc-plumber:test .
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v4
+      with:
+        version: v1.55.2
+        args: --timeout=5m
